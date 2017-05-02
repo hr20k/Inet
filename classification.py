@@ -14,6 +14,30 @@ def load_inet_data(fname):
         i_data.append(t)
 
     return i_data
+
+def data_classification(data):
+    for day in data:
+        xx = 0
+        ox = 0
+        xo = 0
+        oo = 0
+
+        if day['id1'] == 'x' or day['id1'] == 'X':
+            day['id1'] = 0
+
+        # 10進数変換
+        day['id1'] = int(day['id1'], 16)
+        day['id2'] = int(day['id2'], 16)
+
+        if day['id1'] == 0 and day['id2'] == 0:
+            xx += 1
+        elif day['id1'] != 0 and day['id2'] == 0:
+            ox += 1
+        elif day['id1'] == 0 and day['id2'] != 0:
+            xo += 1
+        else:
+            oo += 1
+
 def main():
     # 引数からファイル名を取得
     parser = argparse.ArgumentParser()
