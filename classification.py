@@ -32,7 +32,9 @@ def data_classification(data):
 
         # データがない場合0置換
         if day['id1'] == 'x' or day['id1'] == 'X':
-            day['id1'] = 0
+            day['id1'] = '0'
+        if day['id2'] == 'x' or day['id2'] == 'X':
+            day['id2'] = '0'
 
         # 10進数変換
         day['id1'] = int(day['id1'], 16)
