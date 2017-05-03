@@ -1,6 +1,8 @@
 import argparse
 import datetime
 import csv
+import numpy as np
+import matplotlib.pyplot as plt
 
 def load_inet_data(fname):
     f = open(fname, 'r')
@@ -24,6 +26,9 @@ def data_classification(data):
         # 日にちが変わったら更新
         difference = day['datetime'] - now
         if difference.days > 0:
+
+            for i in range(len(sum)):
+                sum[i] *= 100 / 1440
             t = {'datetime': now,
                  'classify': sum}
             classify.append(t)
@@ -40,19 +45,40 @@ def data_classification(data):
         day['id1'] = int(day['id1'], 16)
         day['id2'] = int(day['id2'], 16)
 
-        if day['id1'] == 0 and day['id2'] == 0:
+        if day['id1'] == 0 and day['id2'] == 0: # xx
             sum[0] += 1
-        elif day['id1'] != 0 and day['id2'] == 0:
+        elif day['id1'] != 0 and day['id2'] == 0: # ox
             sum[1] += 1
-        elif day['id1'] == 0 and day['id2'] != 0:
+        elif day['id1'] == 0 and day['id2'] != 0: # xo
             sum[2] += 1
-        else:
+        else: # oo
             sum[3] += 1
+    for i in range(len(sum)):
+        sum[i] *= 100 / 1440
     t = {'datetime': now,
          'classify': sum}
     classify.append(t)
 
     return classify
+
+def figuer_plot(data):
+    left = [i for i in range(1,len(data)+1)]
+    height_xx = [i['classify'][0] for i in data]
+    height_ox = [i['classify'][1] for i in data]
+    height_xo = [i['classify'][2] for i in data]
+    height_oo = [i['classify'][3] for i in data]
+    labels = [str(i['datetime'].month) + '/' + str(i['datetime'].day) for i in data]
+
+    plt.bar(left, height_oo, align='center', color='#FFA0A0', label='id1 & id2')
+    plt.bar(left, height_ox, align='center', color='#A0A0FF', label='id1', bottom=height_oo)
+    plt.bar(left, height_xo, align='center', color='#A3EF3F', label='id2', bottom=[i+j for i,j in zip(height_oo,height_ox)])
+    # plt.bar(left, height_xx, align='center', color='#202E41', bottom=[i+j+k for i,j,k in zip(height_oo,height_xo,height_ox)])
+    plt.xticks(left, labels)  # 横軸ラベル
+    plt.legend()
+    plt.ylabel('Rate[%]')
+
+    plt.show()
+
 
 def main():
     # 引数からファイル名を取得
@@ -65,8 +91,7 @@ def main():
 
     i_data = load_inet_data(fname)
     classify = data_classification(i_data)
-    for i in classify:
-        print(i)
+    figuer_plot(classify)
 
 if __name__ == '__main__':
     main()
