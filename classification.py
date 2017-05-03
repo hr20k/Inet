@@ -25,7 +25,7 @@ def data_classification(data):
         difference = day['datetime'] - now
         if difference.days > 0:
             t = {'datetime': now,
-                 'classify': [sum[0],sum[1],sum[2],sum[3]]}
+                 'classify': sum}
             classify.append(t)
             now = day['datetime']
             sum = [0]*4
@@ -47,7 +47,7 @@ def data_classification(data):
         else:
             sum[3] += 1
     t = {'datetime': now,
-         'classify': [sum[0], sum[1], sum[2], sum[3]]}
+         'classify': sum}
     classify.append(t)
 
     return classify
