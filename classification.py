@@ -16,12 +16,18 @@ def load_inet_data(fname):
     return i_data
 
 def data_classification(data):
+    classify = [[0]*4]
+    i = 0
+    now = data[0]['datetime']
     for day in data:
-        xx = 0
-        ox = 0
-        xo = 0
-        oo = 0
+        # 日にちが変わったら更新
+        difference = day['datetime'] - now
+        if difference.days > 0:
+            now = day['datetime']
+            classify.append([0] * 4)
+            i += 1
 
+        # データがない場合0置換
         if day['id1'] == 'x' or day['id1'] == 'X':
             day['id1'] = 0
 
@@ -30,13 +36,15 @@ def data_classification(data):
         day['id2'] = int(day['id2'], 16)
 
         if day['id1'] == 0 and day['id2'] == 0:
-            xx += 1
+            classify[i][0] += 1
         elif day['id1'] != 0 and day['id2'] == 0:
-            ox += 1
+            classify[i][1] += 1
         elif day['id1'] == 0 and day['id2'] != 0:
-            xo += 1
+            classify[i][2] += 1
         else:
-            oo += 1
+            classify[i][3] += 1
+
+    return classify
 
 def main():
     # 引数からファイル名を取得
@@ -48,6 +56,7 @@ def main():
     fname = options.input_csv_file
 
     i_data = load_inet_data(fname)
+    classify = data_classification(i_data)
 
 if __name__ == '__main__':
     main()
