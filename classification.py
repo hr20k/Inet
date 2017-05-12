@@ -25,7 +25,6 @@ def load_inet_data(fname):
     return i_data
 
 def type_split(a,b):
-<<<<<<< HEAD
     '''
     Input data format
     sensor data1, sensor data2 
@@ -33,8 +32,6 @@ def type_split(a,b):
     Return data
     'xx' or 'ox' or 'xo' or 'oo'
     '''
-=======
->>>>>>> 2610da2429e768a24ed0fbe4acdba93ce1275778
     # データがない場合0置換
     if a == 'x' or a == 'X':
         a = '0'
@@ -55,7 +52,6 @@ def type_split(a,b):
         return 'oo'
 
 def data_classification(data, type='Day'):
-<<<<<<< HEAD
     '''
     Input data format (.csv)
     2000-01-01,00:00,0,0 (date, id1, id2)
@@ -63,8 +59,6 @@ def data_classification(data, type='Day'):
     Return data format
     {'datetime': now, 'classify': sum} (sum = ['xx','ox','xo','oo'])
     '''
-=======
->>>>>>> 2610da2429e768a24ed0fbe4acdba93ce1275778
     classify = []
     sum = [0]*4
     now = data[0]['datetime']
@@ -109,19 +103,15 @@ def data_classification(data, type='Day'):
     return classify
 
 def figuer_plot_rate(data):
-<<<<<<< HEAD
     '''
     Input data format
     data_classification() out put format
     '''
-=======
->>>>>>> 2610da2429e768a24ed0fbe4acdba93ce1275778
     t = data[1]['datetime'] - data[0]['datetime']
     if t.days == 1:
         type = 'Day'
     elif t.seconds == 3600:
         type = 'Hour'
-<<<<<<< HEAD
 
     x = 0
     while x < len(data):
@@ -334,29 +324,9 @@ def figuer_plot_activity1(data):
                     align='center'
                     )
                 bottom += new_data[i][j]['data']/60
-=======
-    left = [i for i in range(1,len(data)+1)]
-    # height_xx = [i['classify'][0] for i in data]
-    height_ox = [i['classify'][1] for i in data]
-    height_xo = [i['classify'][2] for i in data]
-    height_oo = [i['classify'][3] for i in data]
-    if type == 'Day':
-        labels = [str(i['datetime'].month) + '/' + str(i['datetime'].day) for i in data]
-    else:
-        labels = [i['datetime'].hour for i in data]
-
-    plt.bar(left, height_oo, align='center', color='#FFA0A0', label='id1 & id2')
-    plt.bar(left, height_ox, align='center', color='#A0A0FF', label='id1', bottom=height_oo)
-    plt.bar(left, height_xo, align='center', color='#A3EF3F', label='id2', bottom=[i+j for i,j in zip(height_oo,height_ox)])
-    # plt.bar(left, height_xx, align='center', color='#202E41', bottom=[i+j+k for i,j,k in zip(height_oo,height_xo,height_ox)])
-    plt.xticks(left, labels)
-    plt.legend()
-    plt.ylabel('Rate[%]')
->>>>>>> 2610da2429e768a24ed0fbe4acdba93ce1275778
 
         # plt.show()
 
-<<<<<<< HEAD
         # Print title
         axes[int(days / (1440 * 2))].set_title(str(data[a]['datetime'].year) + '-' + str(data[a]['datetime'].month))
         plt.text(1.7, 23.5, 'id1,id2', size=17, weight='bold', ha='left', color='r')
@@ -366,7 +336,7 @@ def figuer_plot_activity1(data):
         print('new_' + str(data[a]['datetime'].year) + '-' + str(data[a]['datetime'].month) + '_activity' + '.png')
         plt.close(fig)
         a += days
-=======
+
 def figuer_plot_activity(data):
     _data = []
     _frame = type_split(data[0]['id1'],data[0]['id2'])
@@ -396,7 +366,6 @@ def figuer_plot_activity(data):
         _frame = frame
 
     return _data
->>>>>>> 2610da2429e768a24ed0fbe4acdba93ce1275778
 
 def main():
     # 引数からファイル名を取得
@@ -408,16 +377,13 @@ def main():
     fname = options.input_csv_file
 
     i_data = load_inet_data(fname)
-<<<<<<< HEAD
     # classify = data_classification(i_data)
     # figuer_plot_rate(classify)
     # figuer_plot_activity(i_data)
     figuer_plot_activity1(i_data)
-=======
     classify = data_classification(i_data)
     # figuer_plot_rate(classify)
     figuer_plot_activity(i_data)
->>>>>>> 2610da2429e768a24ed0fbe4acdba93ce1275778
 
 if __name__ == '__main__':
     main()
