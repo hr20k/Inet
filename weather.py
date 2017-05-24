@@ -44,39 +44,6 @@ def import_header(place_num, now):
 
 
 def import_data(place_num, start, end):
-    # data = []
-    # x = 0
-    # for year in range(start, end+1):
-    #     data.append([])
-    #     for month in range(1,12+1):
-    #         #URLの指定
-    #         # url = urlopen('http://www.data.jma.go.jp/obd/stats/etrn/view/daily_s1.php?prec_no=' + \
-    #         #     str(place_num[0]) + '&block_no=' + str(place_num[1]) + \
-    #         #     '&year=' + str(year) + '&month=' + str(month) + '&day=1&view=a4')
-    #         url = urlopen('http://www.data.jma.go.jp/obd/stats/etrn/view/hourly_a1.php?prec_no=' + place_num[0] + \
-    #                 '&block_no=' + place_num[1] + '&year=' + now.year + '&month=' + now.month + \
-    #                 '&day=' + now.day + '&view=p1')
-    #         bsobj = BeautifulSoup(url, "html.parser")
-    #
-    #         #テーブルを指定
-    #         table = bsobj.findAll("table",{"class":"data2_s"})[0]
-    #         rows = table.findAll("tr")
-    #
-    #         for row in rows:
-    #             get_data = row.findAll(['td'])
-    #             if get_data:
-    #                 # 積雪量のデータのみ取得
-    #                 num = get_data[12].get_text()
-    #
-    #                 # 例外データを置換
-    #                 num = num.replace(' )', '')
-    #                 num = num.replace(' ]', '')
-    #                 if num == '--' or num == '' or num == '×' or num == '///':
-    #                     num = 0
-    #
-    #                 data[x].append(float(num))
-    #     x += 1
-
     tmp = []
     x = 0
     now = start
@@ -107,8 +74,10 @@ def import_data(place_num, start, end):
 
 
 def main():
-    place = {}  # 使用する地点とスクレイピング用データ
-    place['Namie'] = ['36', '1607']
+    # 使用する地点とスクレイピング用データ
+    place = {
+        'Namie': ['36', '1607']
+    }
 
     start = datetime.datetime.strptime(argv[1], '%Y/%m/%d')
     end = datetime.datetime.strptime(argv[2], '%Y/%m/%d')
