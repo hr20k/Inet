@@ -354,9 +354,9 @@ def figuer_plot_activity1(fname, data):
         plt.text(1.7, 23.5, 'id1,id2', size=17, weight='bold', ha='left', color='r')
         plt.text(1.7, 22.5, 'id1', size=17, weight='bold', ha='left', color='b')
         plt.text(1.7, 21.5, 'id2', size=17, weight='bold', ha='left', color='g')
-        plt.savefig(str(name) + '/' + str(data[a]['datetime'].year) + '-' + \
-                    str(data[a]['datetime'].month) + '_activity.png')
-        print(str(data[a]['datetime'].year) + '-' + str(data[a]['datetime'].month) + '_activity.png')
+        plt.savefig(str(name) + '/' + 'activity_' + str(data[a]['datetime'].year) + '-' + \
+                    str(data[a]['datetime'].month) + '.png')
+        print('activity_' + str(data[a]['datetime'].year) + '-' + str(data[a]['datetime'].month) + '.png')
         # plt.show()
         plt.close(fig)
         a += days

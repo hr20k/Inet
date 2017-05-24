@@ -168,9 +168,9 @@ def figuer_plot_activity(fname, data, interval='1hour'):
         axes[0].set_ylabel('hour')
         plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=0, hspace=0)
         plt.text(1.7, 23.5, 'id2', size=17, weight='bold', ha='left', color='g')
-        plt.savefig(str(name) + '/' + str(data[a]['datetime'].year) + \
-                    '-' + str(data[a]['datetime'].month) + '_coarse.png')
-        print('new_' + str(data[a]['datetime'].year) + '-' + str(data[a]['datetime'].month) + '_coarse.png')
+        plt.savefig(str(name) + '/' + 'coarse_' + str(data[a]['datetime'].year) + \
+                    '-' + str(data[a]['datetime'].month) + '.png')
+        print('coarse_' + str(data[a]['datetime'].year) + '-' + str(data[a]['datetime'].month) + '.png')
         # plt.show()
         plt.close(fig)
         a += days
