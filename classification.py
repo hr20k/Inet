@@ -1,17 +1,22 @@
+# coding: utf-8
+
 import argparse
 import datetime
 import csv
+import os
+import os.path
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def load_inet_data(fname):
-    '''
+    """
     Input data format
     fname: csv filename
 
     Return data format
     {'datetime': datetime.datetime(), 'id1': (sensor1 data), 'id2': (sensor2 data)}
-    '''
+    """
     f = open(fname, 'r')
     d = csv.reader(f)
     i_data = []
@@ -24,14 +29,15 @@ def load_inet_data(fname):
 
     return i_data
 
-def type_split(a,b):
-    '''
+
+def type_split(a, b):
+    """
     Input data format
     sensor data1, sensor data2 
 
     Return data
     'xx' or 'ox' or 'xo' or 'oo'
-    '''
+    """
     # データがない場合0置換
     if a == 'x' or a == 'X':
         a = '0'
@@ -51,14 +57,15 @@ def type_split(a,b):
     else:  # oo
         return 'oo'
 
+
 def data_classification(data, type='Day'):
-    '''
+    """
     Input data format (.csv)
     2000-01-01,00:00,0,0 (date, id1, id2)
 
     Return data format
     {'datetime': now, 'classify': sum} (sum = ['xx','ox','xo','oo'])
-    '''
+    """
     classify = []
     sum = [0]*4
     now = data[0]['datetime']
@@ -83,15 +90,15 @@ def data_classification(data, type='Day'):
             now = day['datetime']
             sum = [0]*4
 
-        t = type_split(day['id1'],day['id2'])
+        t = type_split(day['id1'], day['id2'])
 
-        if t == 'xx': # xx
+        if t == 'xx':  # xx
             sum[0] += 1
-        elif t == 'ox': # ox
+        elif t == 'ox':  # ox
             sum[1] += 1
-        elif t == 'xo': # xo
+        elif t == 'xo':  # xo
             sum[2] += 1
-        else: # oo
+        else:  # oo
             sum[3] += 1
 
     for i in range(len(sum)):
@@ -102,11 +109,12 @@ def data_classification(data, type='Day'):
 
     return classify
 
+
 def figuer_plot_rate(data):
-    '''
+    """
     Input data format
     data_classification() out put format
-    '''
+    """
     t = data[1]['datetime'] - data[0]['datetime']
     if t.days == 1:
         type = 'Day'
@@ -125,7 +133,7 @@ def figuer_plot_rate(data):
         _data = data[x:x+days]
 
         plt.figure(figsize=(15, 10))
-        left = [i for i in range(1,len(_data)+1)]
+        left = [i for i in range(1, len(_data)+1)]
         # height_xx = [i['classify'][0] for i in data]
         height_ox = [i['classify'][1] for i in _data]
         height_xo = [i['classify'][2] for i in _data]
@@ -137,8 +145,10 @@ def figuer_plot_rate(data):
 
         plt.bar(left, height_oo, align='center', color='#FFA0A0', label='id1 & id2')
         plt.bar(left, height_ox, align='center', color='#A0A0FF', label='id1', bottom=height_oo)
-        plt.bar(left, height_xo, align='center', color='#A3EF3F', label='id2', bottom=[i+j for i,j in zip(height_oo,height_ox)])
-        # plt.bar(left, height_xx, align='center', color='#202E41', bottom=[i+j+k for i,j,k in zip(height_oo,height_xo,height_ox)])
+        plt.bar(left, height_xo, align='center', color='#A3EF3F', label='id2', \
+                bottom=[i+j for i, j in zip(height_oo, height_ox)])
+        # plt.bar(left, height_xx, align='center', color='#202E41', \
+        #         bottom=[i+j+k for i, j, k in zip(height_oo, height_xo, height_ox)])
         plt.xticks(left, labels)
         plt.title(str(data[x]['datetime'].year) + '-' + str(data[x]['datetime'].month))
         plt.legend(loc='upper right')
@@ -152,15 +162,15 @@ def figuer_plot_rate(data):
 
 
 def reshape_data(data):
-    '''
+    """
     Input data format
     2000-01-01,00:00,0,0 (date, id1, id2)
     
     Return data format
     {'data': sum, 'count': _frame} (_frame: 'xx','xo','ox','oo')
-    '''
+    """
     _data = []
-    _frame = type_split(data[0]['id1'],data[0]['id2'])
+    _frame = type_split(data[0]['id1'], data[0]['id2'])
     sum = 0
     cnt = -1
     now = data[0]['datetime'] + datetime.timedelta(days=-1)
@@ -175,17 +185,17 @@ def reshape_data(data):
                 _data[cnt].append(t)
 
             _data.append([])
-            _frame = type_split(day['id1'],day['id2'])
+            _frame = type_split(day['id1'], day['id2'])
             sum = 0
             cnt += 1
             now = day['datetime']
 
-        frame = type_split(day['id1'],day['id2'])
+        frame = type_split(day['id1'], day['id2'])
         if frame == _frame:
             sum += 1
         else:
             t = {'data': sum,
-                'count': _frame}
+                 'count': _frame}
             sum = 1
             _data[cnt].append(t)
 
@@ -197,11 +207,12 @@ def reshape_data(data):
 
     return _data
 
+
 def figuer_plot_activity(data):
-    '''
+    """
     Input data format
     load_inet_data() return format (2000-01-01,00:00,0,0 (date, id1, id2))
-    '''
+    """
     _data = reshape_data(data)
 
     # グラフ線画
@@ -219,7 +230,7 @@ def figuer_plot_activity(data):
         for i in _data[int(a/1440):int(a + days/1440)]:
             bar.append([])
             for j in i:
-                for k in ['xx','xo','ox','oo']:
+                for k in ['xx', 'xo', 'ox', 'oo']:
                     if j['count'] == k:
                         bar[x].append(j['data'])
                     else:
@@ -239,7 +250,7 @@ def figuer_plot_activity(data):
         print(bar)
 
         plt.figure(figsize=(15, 10))
-        ind = np.arange(1,bar.shape[0]+1)
+        ind = np.arange(1, bar.shape[0]+1)
         labels = [i['datetime'].day for i in data[a:a+days:1440]]
         print(labels)
         width = 0.8
@@ -251,19 +262,19 @@ def figuer_plot_activity(data):
                 print(i)
 
             n = True
-            for j in bar[:,i]:
+            for j in bar[:, i]:
                 if j != 0:
                     n = False
                     break
-            if n == True:
+            if n:
                 continue
 
             plt.bar(ind,  # バーの左端と重なるx座標
                     bar[:, i]/60,  # バーの高さ
                     width,
                     bottom,  # バーが始まる高さ
-                    color=colors[i%4],  # 色
-                    tick_label = labels,
+                    color=colors[i % 4],  # 色
+                    tick_label=labels,
                     align='center'
                     # label=label[i%4]  # 凡例用のラベル
                     )
@@ -272,7 +283,7 @@ def figuer_plot_activity(data):
 
         plt.ylabel('hour')
         plt.title(str(data[a]['datetime'].year) + '-' + str(data[a]['datetime'].month))
-        plt.text(33.7, 23.5, 'id1,id2' , size = 17, weight = 'bold', ha = 'left', color = 'r')
+        plt.text(33.7, 23.5, 'id1,id2', size=17, weight='bold', ha='left', color='r')
         plt.text(33.7, 22.5, 'id1', size=17, weight='bold', ha='left', color='b')
         plt.text(33.7, 21.5, 'id2', size=17, weight='bold', ha='left', color='g')
         # plt.legend(loc="upper right")
@@ -285,11 +296,15 @@ def figuer_plot_activity(data):
         a += days
 
 
-def figuer_plot_activity1(data):
-    '''
+def figuer_plot_activity1(fname, data):
+    """
     Input data format
     load_inet_data() return format (2000-01-01,00:00,0,0 (date, id1, id2))
-    '''
+    """
+
+    name, ext = os.path.splitext(fname)
+    if not os.path.exists(name):
+        os.mkdir(name)
     _data = reshape_data(data)
 
     # グラフ線画
@@ -302,70 +317,50 @@ def figuer_plot_activity1(data):
                 break
             days += 1440
 
-        new_data =  _data[int(a / 1440):int(a + days / 1440)]
-
+        new_data = _data[int(a / 1440):int(a + days / 1440)]
 
         fig, axes = plt.subplots(1, int(days/1440), sharex=True, sharey=True, figsize=(15, 10))
 
+        ind = np.arange(1)
         width = 0.8
-        colors = {'xx': 'k','xo': 'g','ox': 'b','oo': 'r'}
-        labels = [str(data[a]['datetime'].day) for i in range(int(days/1440))]
+        colors = {'xx': 'k', 'xo': 'g', 'ox': 'b', 'oo': 'r'}
+        labels = [i for i in range(1, int(days/1440 + 1))]
+        print(labels)
 
         for i in range(int(days/1440)):
             bottom = 0
             for j in range(len(new_data[i])):
                 axes[i].bar(
-                    1,  # バーの左端と重なるx座標
+                    ind,  # バーの左端と重なるx座標
                     new_data[i][j]['data']/60,  # バーの高さ
                     width,
                     bottom,  # バーが始まる高さ
                     color=colors[new_data[i][j]['count']],  # 色
-                    tick_label=labels[i],
+                    # tick_label='',
                     align='center'
                     )
                 bottom += new_data[i][j]['data']/60
+
+        for i in range(len(axes)):
+            axes[i].set_xticks(ind + width / 2)
+            axes[i].set_xticklabels((str(labels[i]),))
 
         # plt.show()
 
         # Print title
         axes[int(days / (1440 * 2))].set_title(str(data[a]['datetime'].year) + '-' + str(data[a]['datetime'].month))
+        axes[0].set_ylabel('hour')
+        plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=0, hspace=0)
         plt.text(1.7, 23.5, 'id1,id2', size=17, weight='bold', ha='left', color='r')
         plt.text(1.7, 22.5, 'id1', size=17, weight='bold', ha='left', color='b')
         plt.text(1.7, 21.5, 'id2', size=17, weight='bold', ha='left', color='g')
-        plt.savefig('new_' + str(data[a]['datetime'].year) + '-' + str(data[a]['datetime'].month) + '_activity' + '.png')
-        print('new_' + str(data[a]['datetime'].year) + '-' + str(data[a]['datetime'].month) + '_activity' + '.png')
+        plt.savefig(str(name) + '/' + str(data[a]['datetime'].year) + '-' + \
+                    str(data[a]['datetime'].month) + '_activity.png')
+        print(str(data[a]['datetime'].year) + '-' + str(data[a]['datetime'].month) + '_activity.png')
+        # plt.show()
         plt.close(fig)
         a += days
 
-def figuer_plot_activity(data):
-    _data = []
-    _frame = type_split(data[0]['id1'],data[0]['id2'])
-    sum = 0
-    cnt = -1
-    now = data[0]['datetime'] + datetime.timedelta(days=-1)
-
-    for day in data:
-        # 日にちが変わったら更新
-        difference = day['datetime'] - now
-        if difference.days == 1:
-            _data.append([])
-            _frame = type_split(day['id1'],day['id2'])
-            sum = 0
-            cnt += 1
-            now = day['datetime']
-
-        frame = type_split(day['id1'],day['id2'])
-        if frame == _frame:
-            sum += 1
-        else:
-            t = {'data': sum,
-                'count': _frame}
-            sum = 1
-            _data[cnt].append(t)
-
-        _frame = frame
-
-    return _data
 
 def main():
     # 引数からファイル名を取得
@@ -380,10 +375,7 @@ def main():
     # classify = data_classification(i_data)
     # figuer_plot_rate(classify)
     # figuer_plot_activity(i_data)
-    figuer_plot_activity1(i_data)
-    classify = data_classification(i_data)
-    # figuer_plot_rate(classify)
-    figuer_plot_activity(i_data)
+    figuer_plot_activity1(fname, i_data)
 
 if __name__ == '__main__':
     main()
