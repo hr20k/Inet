@@ -7,6 +7,7 @@ import os
 import os.path
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.ticker import *
 
 
 def load_inet_data(fname):
@@ -138,36 +139,68 @@ def figuer_plot_activity(fname, data, interval='1hour'):
         fig, axes = plt.subplots(1, int(days/1440), sharex=True, sharey=True, figsize=(15, 10))
 
         ind = np.arange(1)
-        width = 0.8
+        width = 1
         colors = {'x': 'w', 'o': 'g'}
         labels = [i for i in range(1, int(days/1440 + 1))]
         print(labels)
 
         for i in range(int(days/1440)):
             bottom = 0
+
+            # select subplot
+            plt.subplot(1, int(days/1440), i + 1)
+
+            # Set xticks
+            plt.xticks(range(1), (str(labels[i]),))
+
+            # Set yticks
+            plt.yticks(np.arange(0, 24, 6))
+
+            # Set axes
+            plt.gca().xaxis.set_ticks_position('none')
+            if i == 0:
+                plt.gca().spines['right'].set_visible(False)
+                plt.gca().yaxis.set_ticks_position('left')
+            elif i < int(days/1440) - 1:
+                plt.gca().spines['right'].set_visible(False)
+                plt.gca().yaxis.set_ticks_position('none')
+                plt.gca().yaxis.set_ticklabels('')
+            else:
+                plt.gca().yaxis.set_ticks_position('none')
+                plt.gca().yaxis.set_ticklabels('')
+            plt.ylim(ymax=24)
+
+            # Set grid
+            plt.grid(which='major', axis='y', linestyle='-')
+            plt.subplot(1, int(days / 1440), i + 1).yaxis.set_minor_locator(MultipleLocator(3))
+            plt.grid(which='minor', axis='y', linestyle='-')
+
             for j in range(len(new_data[i])):
-                axes[i].bar(
+                plt.bar(
                     ind,  # バーの左端と重なるx座標
                     new_data[i][j]['data']/skip,  # バーの高さ
                     width,
                     bottom,  # バーが始まる高さ
                     color=colors[new_data[i][j]['status']],  # 色
-                    tick_label='',
                     align='center'
-                    )
+                )
                 bottom += new_data[i][j]['data']/skip
 
-        for i in range(len(axes)):
-            axes[i].set_xticks(ind + width / 2)
-            axes[i].set_xticklabels((str(labels[i]),))
+        # Set title
+        plt.subplot(1, int(days/1440), int(days / (1440 * 2)))
+        plt.title(str(data[a]['datetime'].year) + '-' + str(data[a]['datetime'].month) + ' (id2)', size=22)
 
-        # plt.show()
+        # Set ylabel
+        plt.subplot(1, int(days / 1440), 1)
+        plt.ylabel('hour', size=22)
 
-        # Print title
-        axes[int(days / (1440 * 2))].set_title(str(data[a]['datetime'].year) + '-' + str(data[a]['datetime'].month))
-        axes[0].set_ylabel('hour')
+        # # Print text
+        # plt.subplot(1, int(days / 1440), int(days / 1440))
+        # plt.text(1.7, 23.5, 'id2', size=17, weight='bold', ha='left', color='g')
+
         plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=0, hspace=0)
-        plt.text(1.7, 23.5, 'id2', size=17, weight='bold', ha='left', color='g')
+
+        # Output figure
         plt.savefig(str(name) + '/' + 'coarse_' + str(data[a]['datetime'].year) + \
                     '-' + str(data[a]['datetime'].month) + '.png')
         print('coarse_' + str(data[a]['datetime'].year) + '-' + str(data[a]['datetime'].month) + '.png')
