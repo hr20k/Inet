@@ -10,7 +10,6 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import *
 
 
-
 def load_inet_data(fname):
     """
     Input data format
@@ -60,53 +59,53 @@ def type_split(a, b):
         return 'oo'
 
 
-def data_classification(data, type='Day'):
+def data_classification(data, d_type='Day'):
     """
     Input data format (.csv)
     2000-01-01,00:00,0,0 (date, id1, id2)
 
     Return data format
-    {'datetime': now, 'classify': sum} (sum = ['xx','ox','xo','oo'])
+    {'datetime': now, 'classify': d_sum} (d_sum = ['xx','ox','xo','oo'])
     """
     classify = []
-    sum = [0]*4
+    d_sum = [0]*4
     now = data[0]['datetime']
 
     for day in data:
         # 日にちが変わったら更新
         difference = day['datetime'] - now
-        if difference.days == 1 and type == 'Day':
-            for i in range(len(sum)):
-                sum[i] *= 100 / 1440
+        if difference.days == 1 and d_type == 'Day':
+            for i in range(len(d_sum)):
+                d_sum[i] *= 100 / 1440
             t = {'datetime': now,
-                 'classify': sum}
+                 'classify': d_sum}
             classify.append(t)
             now = day['datetime']
-            sum = [0]*4
-        elif difference.seconds == 3600 and type == 'Hour':
-            for i in range(len(sum)):
-                sum[i] *= 100 / 60
+            d_sum = [0]*4
+        elif difference.seconds == 3600 and d_type == 'Hour':
+            for i in range(len(d_sum)):
+                d_sum[i] *= 100 / 60
             t = {'datetime': now,
-                 'classify': sum}
+                 'classify': d_sum}
             classify.append(t)
             now = day['datetime']
-            sum = [0]*4
+            d_sum = [0]*4
 
         t = type_split(day['id1'], day['id2'])
 
         if t == 'xx':  # xx
-            sum[0] += 1
+            d_sum[0] += 1
         elif t == 'ox':  # ox
-            sum[1] += 1
+            d_sum[1] += 1
         elif t == 'xo':  # xo
-            sum[2] += 1
+            d_sum[2] += 1
         else:  # oo
-            sum[3] += 1
+            d_sum[3] += 1
 
-    for i in range(len(sum)):
-        sum[i] *= 100 / 1440
+    for i in range(len(d_sum)):
+        d_sum[i] *= 100 / 1440
     t = {'datetime': now,
-         'classify': sum}
+         'classify': d_sum}
     classify.append(t)
 
     return classify
@@ -119,9 +118,9 @@ def figuer_plot_rate(data):
     """
     t = data[1]['datetime'] - data[0]['datetime']
     if t.days == 1:
-        type = 'Day'
+        d_type = 'Day'
     elif t.seconds == 3600:
-        type = 'Hour'
+        d_type = 'Hour'
 
     x = 0
     while x < len(data):
@@ -140,7 +139,7 @@ def figuer_plot_rate(data):
         height_ox = [i['classify'][1] for i in _data]
         height_xo = [i['classify'][2] for i in _data]
         height_oo = [i['classify'][3] for i in _data]
-        if type == 'Day':
+        if d_type == 'Day':
             labels = [i['datetime'].day for i in _data]
         else:
             labels = [i['datetime'].hour for i in _data]
@@ -169,11 +168,11 @@ def reshape_data(data):
     2000-01-01,00:00,0,0 (date, id1, id2)
     
     Return data format
-    {'data': sum, 'count': _frame} (_frame: 'xx','xo','ox','oo')
+    {'data': d_sum, 'count': _frame} (_frame: 'xx','xo','ox','oo')
     """
     _data = []
     _frame = type_split(data[0]['id1'], data[0]['id2'])
-    sum = 0
+    d_sum = 0
     cnt = -1
     now = data[0]['datetime'] + datetime.timedelta(days=-1)
 
@@ -182,28 +181,28 @@ def reshape_data(data):
         difference = day['datetime'] - now
         if difference.days == 1:
             if day['datetime'] != data[0]['datetime']:
-                t = {'data': sum,
+                t = {'data': d_sum,
                      'count': _frame}
                 _data[cnt].append(t)
 
             _data.append([])
             _frame = type_split(day['id1'], day['id2'])
-            sum = 0
+            d_sum = 0
             cnt += 1
             now = day['datetime']
 
         frame = type_split(day['id1'], day['id2'])
         if frame == _frame:
-            sum += 1
+            d_sum += 1
         else:
-            t = {'data': sum,
+            t = {'data': d_sum,
                  'count': _frame}
-            sum = 1
+            d_sum = 1
             _data[cnt].append(t)
 
         _frame = frame
 
-    t = {'data': sum,
+    t = {'data': d_sum,
          'count': _frame}
     _data[cnt].append(t)
 
@@ -327,7 +326,6 @@ def figuer_plot_activity1(fname, data):
         width = 0.8
         colors = {'xx': 'k', 'xo': 'g', 'ox': 'b', 'oo': 'r'}
         labels = [i for i in range(1, int(days/1440 + 1))]
-        print(labels)
 
         for i in range(int(days/1440)):
             bottom = 0

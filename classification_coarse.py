@@ -142,7 +142,6 @@ def figuer_plot_activity(fname, data, interval='1hour'):
         width = 1
         colors = {'x': 'w', 'o': 'g'}
         labels = [i for i in range(1, int(days/1440 + 1))]
-        print(labels)
 
         for i in range(int(days/1440)):
             bottom = 0
@@ -193,10 +192,6 @@ def figuer_plot_activity(fname, data, interval='1hour'):
         # Set ylabel
         plt.subplot(1, int(days / 1440), 1)
         plt.ylabel('hour', size=22)
-
-        # # Print text
-        # plt.subplot(1, int(days / 1440), int(days / 1440))
-        # plt.text(1.7, 23.5, 'id2', size=17, weight='bold', ha='left', color='g')
 
         plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=0, hspace=0)
 
