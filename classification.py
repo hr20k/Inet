@@ -7,7 +7,7 @@ import os
 import os.path
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.ticker import *
+# from matplotlib.ticker import *
 
 
 def load_inet_data(fname):
@@ -37,13 +37,11 @@ def type_split(a, b):
     sensor data1, sensor data2 
 
     Return data
-    'xx' or 'ox' or 'xo' or 'oo'
+    'xx' or 'ox' or 'xo' or 'oo' or '.'
     """
-    # データがない場合0置換
-    if a == 'x' or a == 'X':
-        a = '0'
-    if b == 'x' or b == 'X':
-        b = '0'
+    # データがない場合
+    if a == 'x' or b == 'x' or a == 'X' or b == 'X':
+        return '.'
 
     # 10進数変換
     a = int(a, 16)
@@ -168,7 +166,7 @@ def reshape_data(data):
     2000-01-01,00:00,0,0 (date, id1, id2)
     
     Return data format
-    {'data': d_sum, 'count': _frame} (_frame: 'xx','xo','ox','oo')
+    {'data': d_sum, 'count': _frame} (_frame: 'xx','xo','ox','oo','.')
     """
     _data = []
     _frame = type_split(data[0]['id1'], data[0]['id2'])
@@ -324,13 +322,13 @@ def figuer_plot_activity1(fname, data):
 
         ind = np.arange(1)
         width = 0.8
-        colors = {'xx': 'k', 'xo': 'g', 'ox': 'b', 'oo': 'r'}
+        colors = {'xx': 'k', 'xo': 'g', 'ox': 'b', 'oo': 'r', '.': 'gray'}
         labels = [i for i in range(1, int(days/1440 + 1))]
 
         for i in range(int(days/1440)):
             bottom = 0
 
-            # select subplot
+            # Select subplot
             plt.subplot(1, int(days / 1440), i + 1)
 
             # Set xticks
@@ -353,10 +351,10 @@ def figuer_plot_activity1(fname, data):
                 plt.gca().yaxis.set_ticklabels('')
             plt.ylim(ymax=24)
 
-            # Set grid
-            plt.grid(which='major', axis='y', linestyle='-')
-            plt.subplot(1, int(days / 1440), i + 1).yaxis.set_minor_locator(MultipleLocator(3))
-            plt.grid(which='minor', axis='y', linestyle='-')
+            # # Set grid
+            # plt.grid(which='major', axis='y', linestyle='-')
+            # plt.subplot(1, int(days / 1440), i + 1).yaxis.set_minor_locator(MultipleLocator(3))
+            # plt.grid(which='minor', axis='y', linestyle='-')
 
             for j in range(len(new_data[i])):
                 plt.bar(

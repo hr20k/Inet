@@ -31,30 +31,25 @@ def load_inet_data(fname):
     return i_data
 
 
-def type_split(a, b):
+def type_split(a):
     """
     Input data format
-    sensor data1, sensor data2 
+    sensor data
 
     Return data
-    'xx' or 'ox' or 'xo' or 'oo' or '.'
+    'x' or 'o' or '.'
     """
 
-    if a == 'x' or b == 'x' or a == 'X' or b == 'X':
+    if a == 'x' or a == 'X':
         return '.'
 
     # 10進数変換
     a = int(a, 16)
-    b = int(b, 16)
 
-    if a == 0 and b == 0:  # xx
-        return 'xx'
-    elif a != 0 and b == 0:  # ox
-        return 'ox'
-    elif a == 0 and b != 0:  # xo
-        return 'xo'
-    else:  # oo
-        return 'oo'
+    if a == 0:  # x
+        return 'x'
+    else:  # o
+        return 'o'
 
 
 def reshape_data(data, interval='1hour'):
@@ -63,7 +58,7 @@ def reshape_data(data, interval='1hour'):
     2000-01-01,00:00,0,0 (date, id1, id2)
 
     Return data format
-    {'data': sum, 'status': _frame} (_frame: 'x','o')
+    {'data': sum, 'status': _frame} (_frame: 'x', 'o', '.')
     """
 
     if interval == '1hour':
@@ -71,41 +66,88 @@ def reshape_data(data, interval='1hour'):
     else:
         skip = 1800
 
-    flag = False
-    _flag = False
-    _data = []
-    x = -1
+    flag_x = False
+    flag_o = False
+    _flag = None
+    _data = [[]]
+    x = 0
     dsum = 0
-    now = data[0]['datetime'] + datetime.timedelta(days=-1)
+    now = data[0]['datetime']
 
     for day in data:
 
         difference = day['datetime'] - now
         if difference.days == 1:
-            if day['datetime'] != data[0]['datetime']:
-                _data[x].append({'status': 'o' if flag else 'x', 'data': dsum})
+            print(flag_o, flag_x, _flag)
+            if flag_o and _flag != 'o':
+                _data[x].append({'status': _flag, 'data': dsum})
+                _data[x].append({'status': 'o' if flag_o else 'x' if flag_x else '.', 'data': 1})
+            elif flag_x and not flag_o and _flag != 'x':
+                _data[x].append({'status': _flag, 'data': dsum})
+                _data[x].append({'status': 'o' if flag_o else 'x' if flag_x else '.', 'data': 1})
+            elif not flag_o and not flag_x and _flag != '.':
+                _data[x].append({'status': _flag, 'data': dsum})
+                _data[x].append({'status': 'o' if flag_o else 'x' if flag_x else '.', 'data': 1})
+            else:
+                _data[x].append({'status': 'o' if flag_o else 'x' if flag_x else '.', 'data': dsum + 1})
+            print(_data[x])
 
             x += 1
-            dsum = 1
+            dsum = 0
             _data.append([])
             now = day['datetime']
-            flag = False
-        elif difference.seconds % skip == 0:
-            if flag and flag != _flag:
-                _data[x].append({'status': 'x', 'data': dsum - 1})
-                dsum = 1
-                _flag = True
-            elif not flag and flag != _flag:
-                _data[x].append({'status': 'o', 'data': dsum - 1})
-                dsum = 1
-                _flag = False
-            flag = False
+            flag_o = False
+            flag_x = False
+            _flag = None
+
+        elif difference.seconds == skip:
+            if flag_o:
+                _flag = 'o'
+            elif flag_x:
+                _flag = 'x'
+            else:
+                _flag = '.'
             dsum += 1
+            flag_x = False
+            flag_o = False
 
-        if type_split(day['id1'], day['id2']) == 'xo' or type_split(day['id1'], day['id2']) == 'oo':
-            flag = True
+        elif difference.seconds % skip == 0 and day['datetime'] != data[0]['datetime']:
+            print(flag_o, flag_x, _flag)
+            if flag_o and _flag != 'o':
+                _data[x].append({'status': _flag, 'data': dsum})
+                dsum = 1
+                _flag = 'o'
+            elif flag_x and not flag_o and _flag != 'x':
+                _data[x].append({'status': _flag, 'data': dsum})
+                dsum = 1
+                _flag = 'x'
+            elif not flag_o and not flag_x and _flag != '.':
+                _data[x].append({'status': _flag, 'data': dsum})
+                dsum = 1
+                _flag = '.'
+            else:
+                dsum += 1
+            flag_x = False
+            flag_o = False
 
-    _data[x].append({'status': 'o' if flag else 'x', 'data': dsum})
+        if type_split(day['id2']) == 'o':
+            flag_o = True
+            print(day)
+        elif type_split(day['id2']) == 'x':
+            flag_x = True
+
+    if flag_o and _flag != 'o':
+        _data[x].append({'status': _flag, 'data': dsum})
+        _data[x].append({'status': 'o' if flag_o else 'x' if flag_x else '.', 'data': 1})
+    elif flag_x and not flag_o and _flag != 'x':
+        _data[x].append({'status': _flag, 'data': dsum})
+        _data[x].append({'status': 'o' if flag_o else 'x' if flag_x else '.', 'data': 1})
+    elif not flag_o and not flag_x and _flag != '.':
+        _data[x].append({'status': _flag, 'data': dsum})
+        _data[x].append({'status': 'o' if flag_o else 'x' if flag_x else '.', 'data': 1})
+    else:
+        _data[x].append({'status': 'o' if flag_o else 'x' if flag_x else '.', 'data': dsum + 1})
+    print(_data[x])
 
     return _data
 
@@ -140,7 +182,7 @@ def figuer_plot_activity(fname, data, interval='1hour'):
 
         ind = np.arange(1)
         width = 1
-        colors = {'x': 'w', 'o': 'g'}
+        colors = {'x': 'w', 'o': 'g', '.': 'gray'}
         labels = [i for i in range(1, int(days/1440 + 1))]
 
         for i in range(int(days/1440)):
