@@ -393,19 +393,28 @@ def figuer_plot_activity1(fname, data):
 
 
 def main():
-    # 引数からファイル名を取得
-    parser = argparse.ArgumentParser()
-    parser.add_argument("input_csv_file")
-    parser.add_argument("--encoding", default="utf_8")
-    options = parser.parse_args()
-    print(options.input_csv_file)
-    fname = options.input_csv_file
+    # # 引数からファイル名を取得
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument("input_csv_file")
+    # parser.add_argument("--encoding", default="utf_8")
+    # options = parser.parse_args()
+    # print(options.input_csv_file)
+    # fname = options.input_csv_file
 
-    i_data = load_inet_data(fname)
-    # classify = data_classification(i_data)
-    # figuer_plot_rate(classify)
-    # figuer_plot_activity(i_data)
-    figuer_plot_activity1(fname, i_data)
+    # 同ディレクトリ内からファイル名を全て取得
+    files = os.listdir()
+    filename = []
+    for name in files:
+        fn, ext = os.path.splitext(name)
+        if ext == '.csv' and '_reformatted' in name:
+            filename.append(name)
+
+    for fname in filename:
+        i_data = load_inet_data(fname)
+        # classify = data_classification(i_data)
+        # figuer_plot_rate(classify)
+        # figuer_plot_activity(i_data)
+        figuer_plot_activity1(fname, i_data)
 
 if __name__ == '__main__':
     main()

@@ -78,7 +78,6 @@ def reshape_data(data, interval='1hour'):
 
         difference = day['datetime'] - now
         if difference.days == 1:
-            print(flag_o, flag_x, _flag)
             if flag_o and _flag != 'o':
                 _data[x].append({'status': _flag, 'data': dsum})
                 _data[x].append({'status': 'o' if flag_o else 'x' if flag_x else '.', 'data': 1})
@@ -90,7 +89,6 @@ def reshape_data(data, interval='1hour'):
                 _data[x].append({'status': 'o' if flag_o else 'x' if flag_x else '.', 'data': 1})
             else:
                 _data[x].append({'status': 'o' if flag_o else 'x' if flag_x else '.', 'data': dsum + 1})
-            print(_data[x])
 
             x += 1
             dsum = 0
@@ -112,7 +110,6 @@ def reshape_data(data, interval='1hour'):
             flag_o = False
 
         elif difference.seconds % skip == 0 and day['datetime'] != data[0]['datetime']:
-            print(flag_o, flag_x, _flag)
             if flag_o and _flag != 'o':
                 _data[x].append({'status': _flag, 'data': dsum})
                 dsum = 1
@@ -132,7 +129,6 @@ def reshape_data(data, interval='1hour'):
 
         if type_split(day['id2']) == 'o':
             flag_o = True
-            print(day)
         elif type_split(day['id2']) == 'x':
             flag_x = True
 
@@ -147,9 +143,30 @@ def reshape_data(data, interval='1hour'):
         _data[x].append({'status': 'o' if flag_o else 'x' if flag_x else '.', 'data': 1})
     else:
         _data[x].append({'status': 'o' if flag_o else 'x' if flag_x else '.', 'data': dsum + 1})
-    print(_data[x])
 
     return _data
+
+
+def padding_data(data):
+    """
+    Input data format
+    2000-01-01,00:00,0,0 (date, id1, id2)
+
+    Return data format
+    2000-01-01,00:00,'x','x' (date, id1, id2)
+    """
+    start = data[0]['datetime']
+    now = start - datetime.timedelta(days=start.day - 1, seconds=60)
+    pad = []
+
+    for i in range((start.day - 1) * 1440):
+        now += datetime.timedelta(seconds=60)
+        t = {'datetime': now,
+             'id1': 'x',
+             'id2': 'x'}
+        pad.append(t)
+
+    return pad + data
 
 
 def figuer_plot_activity(fname, data, interval='1hour'):
@@ -160,6 +177,8 @@ def figuer_plot_activity(fname, data, interval='1hour'):
     name, ext = os.path.splitext(fname)
     if not os.path.exists(name):
         os.mkdir(name)
+
+    data = padding_data(data)
     _data = reshape_data(data, interval)
     if interval == '1hour':
         skip = 1
@@ -247,16 +266,25 @@ def figuer_plot_activity(fname, data, interval='1hour'):
 
 
 def main():
-    # 引数からファイル名を取得
-    parser = argparse.ArgumentParser()
-    parser.add_argument("input_csv_file")
-    parser.add_argument("--encoding", default="utf_8")
-    options = parser.parse_args()
-    print(options.input_csv_file)
-    fname = options.input_csv_file
+    # # 引数からファイル名を取得
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument("input_csv_file")
+    # parser.add_argument("--encoding", default="utf_8")
+    # options = parser.parse_args()
+    # print(options.input_csv_file)
+    # fname = options.input_csv_file
 
-    i_data = load_inet_data(fname)
-    figuer_plot_activity(fname, i_data)
+    # 同ディレクトリ内からファイル名を全て取得
+    files = os.listdir()
+    filename = []
+    for name in files:
+        fn, ext = os.path.splitext(name)
+        if ext == '.csv' and '_reformatted' in name:
+            filename.append(name)
+
+    for fname in filename:
+        i_data = load_inet_data(fname)
+        figuer_plot_activity(fname, i_data)
 
 if __name__ == '__main__':
     main()
