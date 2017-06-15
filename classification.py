@@ -207,11 +207,34 @@ def reshape_data(data):
     return _data
 
 
+def padding_data(data):
+    """
+    Input data format
+    2000-01-01,00:00,0,0 (date, id1, id2)
+
+    Return data format
+    2000-01-01,00:00,'x','x' (date, id1, id2)
+    """
+    start = data[0]['datetime']
+    now = start - datetime.timedelta(days=start.day - 1, seconds=60)
+    pad = []
+
+    for i in range((start.day - 1) * 1440):
+        now += datetime.timedelta(seconds=60)
+        t = {'datetime': now,
+             'id1': 'x',
+             'id2': 'x'}
+        pad.append(t)
+
+    return pad + data
+
+
 def figuer_plot_activity(data):
     """
     Input data format
     load_inet_data() return format (2000-01-01,00:00,0,0 (date, id1, id2))
     """
+    data = padding_data(data)
     _data = reshape_data(data)
 
     # グラフ線画
@@ -304,6 +327,8 @@ def figuer_plot_activity1(fname, data):
     name, ext = os.path.splitext(fname)
     if not os.path.exists(name):
         os.mkdir(name)
+
+    data = padding_data(data)
     _data = reshape_data(data)
 
     # グラフ線画
@@ -400,6 +425,9 @@ def main():
     # options = parser.parse_args()
     # print(options.input_csv_file)
     # fname = options.input_csv_file
+    #
+    # i_data = load_inet_data(fname)
+    # figuer_plot_activity1(fname, i_data)
 
     # 同ディレクトリ内からファイル名を全て取得
     files = os.listdir()
@@ -410,6 +438,7 @@ def main():
             filename.append(name)
 
     for fname in filename:
+        print(fname)
         i_data = load_inet_data(fname)
         # classify = data_classification(i_data)
         # figuer_plot_rate(classify)

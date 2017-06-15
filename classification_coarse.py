@@ -283,6 +283,7 @@ def main():
             filename.append(name)
 
     for fname in filename:
+        print(fname)
         i_data = load_inet_data(fname)
         figuer_plot_activity(fname, i_data)
 
