@@ -8,9 +8,9 @@ from bs4 import BeautifulSoup
 
 
 def import_header_hourly(place_num, now):
-    url = urlopen('http://www.data.jma.go.jp/obd/stats/etrn/view/hourly_a1.php?prec_no=' + place_num[0] + \
-                  '&block_no=' + place_num[1] + '&year=' + str(now.year) + '&month=' + str(now.month) + \
-                  '&day=' + str(now.day) + '&view=p1')
+    url = urlopen('http://www.data.jma.go.jp/obd/stats/etrn/view/hourly_' + place_num[0] + '.php?prec_no=' + \
+                  place_num[1] + '&block_no=' + place_num[2] + '&year=' + str(now.year) + '&month=' + \
+                  str(now.month) + '&day=' + str(now.day) + '&view=p1')
     bsobj = BeautifulSoup(url, "html.parser")
 
     # テーブルを指定
@@ -44,9 +44,9 @@ def import_header_hourly(place_num, now):
 
 
 def import_header_daily(place_num, now):
-    url = urlopen('http://www.data.jma.go.jp/obd/stats/etrn/view/daily_a1.php?prec_no=' + place_num[0] + \
-                  '&block_no=' + place_num[1] + '&year=' + str(now.year) + '&month=' + str(now.month) + \
-                  '&day=' + str(now.day) + '&view=p1')
+    url = urlopen('http://www.data.jma.go.jp/obd/stats/etrn/view/daily_' + place_num[0] + '.php?prec_no=' + \
+                  place_num[1] + '&block_no=' + place_num[2] + '&year=' + str(now.year) + '&month=' + \
+                  str(now.month) + '&day=' + str(now.day) + '&view=p1')
     bsobj = BeautifulSoup(url, "html.parser")
 
     # テーブルを指定
@@ -84,10 +84,10 @@ def import_data_hourly(place_num, start, end):
     x = 0
     now = start
     while now <= end:
-        print(now)
-        url = urlopen('http://www.data.jma.go.jp/obd/stats/etrn/view/hourly_a1.php?prec_no=' + place_num[0] + \
-                      '&block_no=' + place_num[1] + '&year=' + str(now.year) + '&month=' + str(now.month) + \
-                      '&day=' + str(now.day) + '&view=p1')
+        # print(now)
+        url = urlopen('http://www.data.jma.go.jp/obd/stats/etrn/view/hourly_' + place_num[0] + '.php?prec_no=' + \
+                      place_num[1] + '&block_no=' + place_num[2] + '&year=' + str(now.year) + '&month=' + \
+                      str(now.month) + '&day=' + str(now.day) + '&view=p1')
         bsobj = BeautifulSoup(url, "html.parser")
 
         # テーブルを指定
@@ -114,10 +114,10 @@ def import_data_daily(place_num, start, end):
     x = 0
     now = start
     while now <= end:
-        print(now)
-        url = urlopen('http://www.data.jma.go.jp/obd/stats/etrn/view/daily_a1.php?prec_no=' + place_num[0] + \
-                      '&block_no=' + place_num[1] + '&year=' + str(now.year) + '&month=' + str(now.month) + \
-                      '&day=' + str(now.day) + '&view=p1')
+        # print(now)
+        url = urlopen('http://www.data.jma.go.jp/obd/stats/etrn/view/daily_' + place_num[0] + '.php?prec_no=' + \
+                      place_num[1] + '&block_no=' + place_num[2] + '&year=' + str(now.year) + '&month=' + \
+                      str(now.month) + '&day=' + str(now.day) + '&view=p1')
         bsobj = BeautifulSoup(url, "html.parser")
 
         # テーブルを指定
@@ -146,22 +146,37 @@ def import_data_daily(place_num, start, end):
 def main():
     # 使用する地点とスクレイピング用データ
     place = {
-        'Namie': ['36', '0295']
+        'Namie': ['a1', '36', '0295'],
+        'Soma': ['a1', '36', '0285'],
+        'Hirono': ['a1', '36', '1034'],
+        'Fukushima': ['s1', '36', '47595'],
+        'Onahama': ['s1', '36', '47598'],
+        'Sirakawa': ['s1', '36', '47597'],
+        'Wakamatsu': ['s1', '36', '47570']
     }
+
+    interval = 'daily'  # 'hourly' or 'daily'
 
     start = datetime.datetime.strptime(argv[1], '%Y/%m/%d')
     end = datetime.datetime.strptime(argv[2], '%Y/%m/%d')
-    print(start, end)
+    print('Start: ' + str(start))
+    print('End: ' + str(end))
 
-    # header = import_header_hourly(place['Namie'], start)
-    # data = import_data_hourly(place['Namie'], start, end)
-    data = import_data_daily(place['Namie'], start, end)
+    for area in place:
+        filename = str(area) + '_' + str(interval) + '_weather.csv'
 
-    with open('test_weather.csv', 'w') as f:
-        writer = csv.writer(f, lineterminator='\n')  # 改行コード(\n)
-        # writer.writerow(header)
-        writer.writerows(data)
-    print('Output test_weather.csv')
+        if interval == 'hourly':
+            # header = import_header_hourly(place[area], start)
+            data = import_data_hourly(place[area], start, end)
+        else:
+            data = import_data_daily(place[area], start, end)
+
+        with open(filename, 'w', encoding="shift_jis") as f:
+            writer = csv.writer(f, lineterminator='\n')  # 改行コード('\n')
+            # if interval == 'hourly':
+            #     writer.writerow(header)
+            writer.writerows(data)
+        print('Output ' + str(filename))
 
 if __name__ == '__main__':
     main()
